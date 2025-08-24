@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  username    String   @unique
+  passwordHash String
+  role        String   // 'packer', 'manager', 'admin'
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  videos              Video[]
+  jobPackingSessions  JobPackingSession[]
+  
+  @@map("users")
+}
+
+model Order {
+  id            String   @id @default(cuid())
+  customerName  String
+  customerEmail String
+  itemsCount    Int
+  priority      String   // 'high', 'medium', 'low'
+  status        String   // 'waiting', 'in_progress', 'completed'
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  jobPackingSessions JobPackingSession[]
+  
+  @@map("orders")
+}
+
+model Video {
+  id            String   @id @default(cuid())
+  jobId         String
+  fileName      String
+  driveFileId   String
+  shareableLink String
+  recordedAt    DateTime @default(now())
+  duration      Int?     // in seconds
+  uploadStatus  String   // 'uploading', 'completed', 'failed'
+  fileSize      Int?     // in bytes
+  
+  // Relations
+  packerId      String
+  packer        User     @relation(fields: [packerId], references: [id])
+  
+  @@map("videos")
+}
+
+model JobPackingSession {
+  id          String    @id @default(cuid())
+  jobId       String
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  status      String    // 'active', 'completed', 'cancelled'
+  
+  // Relations
+  orderId     String?
+  order       Order?    @relation(fields: [orderId], references: [id])
+  packerId    String
+  packer      User      @relation(fields: [packerId], references: [id])
+  
+  @@map("job_packing_sessions")
+}
