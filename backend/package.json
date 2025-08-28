@@ -7,12 +7,14 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "seed": "node prisma/seed.js",
-    "build": "npx prisma generate && npx prisma db push && npm run seed",
+    "build": "npx prisma generate",
+    "deploy": "npx prisma db push --accept-data-loss && npm run seed",
+    "railway:start": "bash start.sh",
     "postinstall": "npx prisma generate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "prisma": {
-    "seed": "node prisma/seed.js"
+  "engines": {
+    "node": ">=18.0.0"
   },
   "keywords": [],
   "author": "",
